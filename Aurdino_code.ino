@@ -1,12 +1,12 @@
 #include<SoftwareSerial.h>
 
-int A = 7;
-int B = 8;
-int C = 9;
-int D = 10;
-
-const int rx = 13;
-const int tx = 12;
+int M = 2;
+int N = 3;
+int O = 4;
+int P = 5;
+int count=0;
+const int rx = 11;
+const int tx = 10;
 
 SoftwareSerial bluetooth(rx,tx);
 
@@ -14,28 +14,30 @@ void setup()
 {
   Serial.begin(38400);
   bluetooth.begin(9600);
-  pinMode(A,OUTPUT);
-  pinMode(B,OUTPUT);
-  pinMode(C,OUTPUT);
-  pinMode(D,OUTPUT);
+  attachInterrupt(digitalPinToInterrupt(18),isr,HIGH);
+  pinMode(M,OUTPUT);
+  pinMode(N,OUTPUT);
+  pinMode(O,OUTPUT);
+  pinMode(P,OUTPUT);
 }
 
-void loop() 
-{
   int i=0,x, dist=0,j,n=1;
-  const 
-  String a,d,m; 
-
+  String a,d,deg;
+  float m=0;
+void loop() 
+{ 
+  dist = 0; i = 0; n = 1;
   bluetooth.write(" "); 
   while(bluetooth.available() == 0)
   {
     ;
   }
   a = bluetooth.readString();
-  Serial.print("a = ");
-  Serial.println(a);
   
-  if(a[0]==48||a[0]==50)
+  Serial.print("a = ");
+  Serial.println(a[0]);
+  
+  if(a[0]==48)
   {
     bluetooth.write("9");
 
@@ -43,19 +45,20 @@ void loop()
         {
           ;
         }
+        
     d = bluetooth.readString();
-        Serial.print("d is ::");
-    Serial.println(d);
+    
     i = 0;
     while(d[i]!='\0')
     {
       i++;
     }
-
+    
     j = i;
     i = 0;
-    j -= 3;
-   
+    j -= 1;
+    n = 1;
+    
     dist = 0;
     while(j-->0)
      {
@@ -63,7 +66,7 @@ void loop()
      }
      
 
-    while(d[i]!='.')
+    while(d[i]!='\0')
     {
       x = d[i++];
       dist += (x-48) * n;
@@ -73,8 +76,8 @@ void loop()
     Serial.print("dist = ");
     Serial.println(dist);
 
-    //m = 0;
-    //movecar();
+    m = 0;
+    movecar();
   }
 
 if(a[0]==49)
@@ -88,6 +91,7 @@ if(a[0]==49)
     d = bluetooth.readString();
 
     i = 0;
+    
     while(d[i]!='\0')
     {
       i++;
@@ -95,16 +99,17 @@ if(a[0]==49)
 
     j = i;
     i = 0;
-    j -= 3;
+    j -= 1;
    
     dist = 0;
+    n=1;
     while(j-->0)
      {
       n = n * 10;
      }
      
 
-    while(d[i]!='.')
+    while(d[i]!='\0')
     {
       x = d[i++];
       dist += (x-48) * n;
@@ -114,51 +119,121 @@ if(a[0]==49)
     Serial.print("dist = ");
     Serial.println(dist);
 
-    //m = 90;
-    //movecar();
+    m = 90;
+    movecar();
   }
 
- /* if(a==2)
+if(a[0]==50)
   {
-    bluetooth.write(9);
+//    Serial.println(F("+++"));
+    bluetooth.write("8");
 
     while(bluetooth.available()==0)
-    {
-      ;
-    }
-
+        {
+          ;
+        }
     d = bluetooth.readString();
-    Serial.println(d);
 
-    while(bluetooth.available()==0)
+    i = 0;
+    while(d[i]!='\0')
+    {
+      i++;
+    }
+
+    j = i;
+    i = 0;
+    j -= 1;
+   
+    dist = 0;
+    n = 1;
+    while(j-->0)
+     {
+      n = n * 10;
+     }
+     
+
+    while(d[i]!='\0')
+    {
+      x = d[i++];
+      dist += (x-48) * n;
+      n /= 10;
+    }
+
+    Serial.print("dist = ");
+    Serial.println(dist);
+    bluetooth.write(" ");  
+    while(bluetooth.available() == 0)
     {
       ;
     }
-
-    m = bluetooth.readString();
-    Serial.println(m);
-
+    deg = bluetooth.readString();
+    i = 0;
+    while(deg[i]!='\0')
+    {
+      i++;
+    }
+    j = i;
+    i = 0;
+    j -= 1;
+    n = 1;
+    m = 0;
+    while(j-->0)
+     {
+      n = n * 10;
+     }
+    while(deg[i]!='\0')
+    {
+      x = deg[i++];
+      m += (x-48) * n;
+      n /= 10;
+    }    
+    Serial.print("m = ");
+    Serial.println(m);  
     movecar();
-  }*/
-
+  }
 }
 
+
+
+
+
+
+
+//********************///
 void movecar()
 {
-  digitalWrite(A,HIGH);
-  digitalWrite(B,LOW);
-  digitalWrite(C,LOW);
-  digitalWrite(D,LOW);
-  //delay();
+  while(count<(0.8*m))
+   {
+    Serial.println("tttttttttttttttttttt");
+    digitalWrite(M,HIGH);
+    digitalWrite(N,LOW);
+    digitalWrite(O,LOW);
+    digitalWrite(P,LOW);
+   }
+  count=0;
+
+  if(m!=0)
+  digitalWrite(M,LOW);
   
-  digitalWrite(A,HIGH);
-  digitalWrite(B,LOW);
-  digitalWrite(C,HIGH);
-  digitalWrite(D,LOW);
+  while(count<(dist/10))
+  {
+    Serial.println("ddddddddddddddddddddddddddddddddddd");
+   digitalWrite(M,HIGH);
+   digitalWrite(N,LOW);
+   digitalWrite(O,HIGH);
+   digitalWrite(P,LOW);
+  }
+  count=0;
+  
+  digitalWrite(M,LOW);
+  digitalWrite(O,LOW);
+}
+//********************************//
 
-  //delay();
 
-  digitalWrite(A,LOW);
-  digitalWrite(C,LOW);
 
+
+void isr()
+{
+  count++;
 }
