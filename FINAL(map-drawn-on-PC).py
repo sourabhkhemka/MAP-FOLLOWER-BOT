@@ -177,25 +177,86 @@ tog1.sort(key=size)
 
 def dist(a):
     return np.sqrt((a[0]-a[2])**2 + (a[1]-a[3])**2)
-    
 
-
-# inst[] IS LIST CONTAING INFO ABOUT EACH LINE IN ORDER 
-    # THIS SET OF INSTRUCTIONS WILL BE USED TO SEND TO AURDINO
-count = 0  
-inst = []
+count = 0
 while(count<len(tog1)):
     try:
-        if(tog1[count][0] == tog1[count][2]):
-            inst.append([1,dist(tog1[count]),0])
-        elif(tog1[count][1] == tog1[count][3]):
-            inst.append([0,dist(tog1[count]),0.90])
-        else:
-            inst.append([2,dist(tog1[count]),
-                         abs((tog1[count][3]-tog1[count][1])/
-                             (tog1[count][2]-tog1[count][0]))])
+        if(set(tog1[count])==set(tog1[count+1])): #FILTER TO REMOVE DUPLICATES IN CASE OF LINE IN DIRECTION OF VECTOR (i - j)
+            tog1.pop(count)                       #WHEN THE LINE IS IN DIR OF THIS VECTOR A DUPLICATE IS GENERATED AT INDEX JUST NEXT TO IT
     except:
         pass
     count += 1
+        
+
+import math        #IMPORTING math FOR CALCULATIONS OF ANGLE
+
+inst = []          #inst (type:list) CONTAINS THE PROPERLY ORDERED SET OF INSTRUCTIONS TO BE TRANSMITTED TO BOT 
+count = 0
+while(count<len(tog1)):
+    try:
+        angle = math.degrees(math.atan((
+                                 float(tog1[count][3]-tog1[count][1])/
+                                                 (tog1[count][2]-tog1[count][0] #ANGLE CALCULATIONS
+                                                 ))))
+    except:
+        angle = 90  #except BLOC WILL BE EXECUTED WHEN ANGLE=90 i-e DIVISION BY 0 WILL TAKE PLACE IN try BLOC 
     
+    if(count==0):
+        if(abs(angle)==90):
+            if(tog1[count][3]>tog1[count][1]):
+                angle = 90
+            elif(tog1[count][3]<tog1[count][1]):
+                angle = 270
+        elif((tog1[count][2]>tog1[count][0]) and (tog1[count][3]<tog1[count][1])):
+            angle = -angle
+        elif((tog1[count][2]>tog1[count][0]) and (tog1[count][3]>tog1[count][1])):  #THE ANGLE CALCULATED IS IN RANGE OF 0to90 OR 0to-90
+            angle = 270 + angle                                                     #CONVERTING IT TO PROPER FORM(4 QUAD SYSTEM) 0<=angle<360
+        elif((tog1[count][2]<tog1[count][0]) and (tog1[count][3]<tog1[count][1])):
+            angle = 180 - angle
+        elif((tog1[count][2]<tog1[count][0]) and (tog1[count][3]>tog1[count][1])):
+            angle = 180 - angle
+        inst.append(['wheel number',dist(tog1[count]),angle])  
+    else:
+        if(abs(tog1[count][2]-tog1[count-1][2])<6 and abs(tog1[count][3]-tog1[count-1][3])<6):
+            n = 2
+        else:
+            n = 0
+            
+        if(abs(angle)==90):
+            if(tog1[count][1]>tog1[count-1][3]):
+                angle = 90
+            elif(tog1[count][1]<tog1[count-1][3]):
+                angle = 270
+        elif((tog1[count][2-n]-tog1[count-1][2])>6 and (tog1[count][3-n]-tog1[count-1][3])<-6):
+            angle = -angle
+        elif((tog1[count][2-n]-tog1[count-1][2])>6 and (tog1[count][3-n]-tog1[count-1][3])>6):
+            angle = 270 + angle
+        elif((tog1[count][2-n]-tog1[count-1][2])<-6 and (tog1[count][3-n]-tog1[count-1][3])<-6):
+            angle = 180 - angle
+        elif((tog1[count][2-n]-tog1[count-1][2])<-6 and (tog1[count][3-n]-tog1[count-1][3])>6):
+            angle = 180 - angle
+        inst.append(['wheel number',dist(tog1[count]),angle])
+
+
+    count += 1
+    
+count = 0
+while(count<len(inst)):
+    if(count==0):
+        #inst[count][0] = 1    ## WHEEL NUMBER
+        if(inst[count][2]<180):
+            inst[count][0] = 2     ## ANGLE RETURNED IS ALWAYS POSSITIVE
+        else:
+            inst[count][1] = 1
+    else:
+        diff = inst[count][2] - inst[count-1][2]
+        if(diff>180):
+            inst[count][0] = 1
+        elif(diff<180 and diff>0):
+            inst[count][0] = 2         
+        elif(diff<-180):
+            inst[count][0] = 2
+        elif(diff<0 and diff >-180):
+            inst[count][0] = 1
+    count += 1
 
