@@ -1,3 +1,7 @@
+"""
+@author: Sourabh Khemka
+"""
+
 import cv2                                                                      # OPENCV IMPORTED
 import numpy as np                                                              # NUMPY IMPORTED
 
