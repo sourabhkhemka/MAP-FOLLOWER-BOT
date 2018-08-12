@@ -1,7 +1,3 @@
-"""
-@author: Sourabh Khemka
-"""
-
 import cv2                                                                      # OPENCV IMPORTED
 import numpy as np                                                              # NUMPY IMPORTED
 
@@ -251,7 +247,7 @@ while(count<len(inst)):
         if(inst[count][2]<180):
             inst[count][0] = 2     ## ANGLE RETURNED IS ALWAYS POSSITIVE
         else:
-            inst[count][1] = 1
+            inst[count][0] = 1
     else:
         diff = inst[count][2] - inst[count-1][2]
         if(diff>180):
